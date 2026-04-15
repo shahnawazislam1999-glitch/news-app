@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News & Job Portal</title>
+    <style>
+        /* --- CSS STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        /* Header */
+        header {
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        /* Main Content Grid */
+        main {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            padding: 20px;
+            flex-grow: 1;
+            overflow: hidden; /* Keeps the main container from scrolling */
+        }
+
+        /* Individual Columns */
+        .column {
+            background-color: white;
+            border: 2px solid black;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .column h2 {
+            text-align: center;
+            font-size: 16px;
+            padding: 15px 0;
+            border-bottom: 2px solid black;
+            text-transform: uppercase;
+        }
+
+        /* Scrollable List inside Columns */
+        .scrollable-list {
+            flex-grow: 1;
+            overflow-y: auto; /* Enables vertical scrolling */
+            padding: 10px;
+        }
+
+        /* Custom Scrollbar for better UI */
+        .scrollable-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .scrollable-list::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 5px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bullet {
+            margin-right: 8px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .headline {
+            flex-grow: 1;
+        }
+
+        .know-more-btn {
+            background: none;
+            border: none;
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        footer {
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 30px;
+            font-size: 14px;
+        }
+
+        /* --- POPUP / MODAL STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .close-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 1024px) {
+            main { grid-template-columns: repeat(3, 1fr); overflow-y: auto; }
+            .column { min-height: 400px; }
+        }
+        @media (max-width: 768px) {
+            main { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        NEWS HEADLINE
+    </header>
+
+    <main>
+        <div class="column">
+            <h2>GOV JOB</h2>
+            <div class="scrollable-list" id="gov-job-list">
+                </div>
+        </div>
+
+        <div class="column">
+            <h2>PVT JOB</h2>
+            <div class="scrollable-list" id="pvt-job-list"></div>
+        </div>
+
+        <div class="column">
+            <h2>WORK FROM HOME</h2>
+            <div class="scrollable-list" id="wfh-list"></div>
+        </div>
+
+        <div class="column">
+            <h2>ADMIT CARD (FOR GOVT. JOB)</h2>
+            <div class="scrollable-list" id="admit-card-list"></div>
+        </div>
+
+        <div class="column">
+            <h2>JOB RELATED NEWS</h2>
+            <div class="scrollable-list" id="news-list"></div>
+        </div>
+	<div class="column">
+            <h2>IMPORTANT BOOKS</h2>
+            <div class="scrollable-list" id="books-list"></div>
+        </div>
+
+	<div class="column">
+            <h2>TRENDING JOB</h2>
+            <div class="scrollable-list" id="trending-news"></div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div>ABOUT US</div>
+        <div>CONT. NO</div>
+    </footer>
+
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Loading Title...</h3>
+                <button class="close-btn" id="closeModalBtn">X Close</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Loading content...
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+
+    <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCToPB-kbQgfr-QEB_zeLN-8NjYDIfcQw",
+        authDomain: "news-app-67878.firebaseapp.com",
+        projectId: "news-app-67878",
+        storageBucket: "news-app-67878.firebasestorage.app",
+        messagingSenderId: "289992061814",
+        appId: "1:289992061814:web:bf6a93d4082f5b6354057"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    console.log("Firebase connected", db);
+
+    /* --- DATE FORMATTING LOGIC --- */
+    function formatFirebaseDate(firebaseTimestamp) {
+        if (!firebaseTimestamp) return ''; // If no date exists, show nothing
+        
+        const date = firebaseTimestamp.toDate(); // Convert Firebase time to normal time
+        
+        // Get day with st, nd, rd, th
+        const day = date.getDate();
+        const suffix = (day % 10 === 1 && day !== 11) ? 'st' :
+                       (day % 10 === 2 && day !== 12) ? 'nd' :
+                       (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+        
+        // Get month name
+        const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        
+        // Formate time (12-hour AM/PM)
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+
+        return ` ${day}${suffix} ${month} ${year} , ${hours}:${minutes} ${ampm} `;
+    }
+
+    /* --- FIREBASE DATA FETCHING --- */
+    function fetchAndRenderList(category, elementId) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '<span style="padding:10px; font-size:12px;">Loading updates...</span>'; 
+
+        // Query the 'posts' collection and order by newest first!
+        db.collection('posts')
+          .where('category', '==', category)
+          .orderBy('createdAt', 'desc') // Sorts so newest dates are at the top
+          .get()
+        .then((snapshot) => {
+            container.innerHTML = ''; 
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<span style="padding:10px; font-size:12px;">No updates available.</span>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                
+                const titleText = item.title ? item.title : 'No Title';
+                const contentHTML = item.content ? item.content : 'No Content';
+                
+                // Create the date text if a date exists in Firebase
+                const dateText = item.createdAt ? `<span style="font-size: 11px; color: #666; margin-left: 5px;">${formatFirebaseDate(item.createdAt)}</span>` : '';
+
+                div.innerHTML = `
+                    <span class="bullet">•</span>
+                    <span class="headline">${titleText}${dateText}
+                        <button class="know-more-btn">[know more]</button>
+                    </span>
+                `;
+                
+                const btn = div.querySelector('.know-more-btn');
+                btn.addEventListener('click', () => {
+                    openModal(titleText, contentHTML);
+                });
+
+                container.appendChild(div);
+            });
+        })
+        .catch((error) => {
+            console.error("Error getting documents: ", error);
+            // If the index isn't built yet, we fallback to a simpler query without ordering
+            if(error.message.includes("index")) {
+                 console.warn("Please create the Firebase index by clicking the link in the console error to enable sorting.");
+                 fallbackFetchAndRenderList(category, elementId);
+            } else {
+                 container.innerHTML = '<span style="color:red; padding:10px; font-size:12px;">Error loading data.</span>';
+            }
+        });
+    }
+
+    // Fallback if sorting fails before you create the Firebase index
+    function fallbackFetchAndRenderList(category, elementId) {
+        const container = document.getElementById(elementId);
+        db.collection('posts').where('category', '==', category).get().then((snapshot) => {
+            container.innerHTML = '';
+            if (snapshot.empty) return;
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                const titleText = item.title || 'No Title';
+                const contentHTML = item.content || 'No Content';
+                const dateText = item.createdAt ? `<span style="font-size: 11px; color: #666; margin-left: 5px;">${formatFirebaseDate(item.createdAt)}</span>` : '';
+                div.innerHTML = `<span class="bullet">•</span><span class="headline">${titleText}${dateText}<button class="know-more-btn">[know more]</button></span>`;
+                div.querySelector('.know-more-btn').addEventListener('click', () => openModal(titleText, contentHTML));
+                container.appendChild(div);
+            });
+        });
+    }
+
+    fetchAndRenderList('gov_job', 'gov-job-list');
+    fetchAndRenderList('pvt_job', 'pvt-job-list');
+    fetchAndRenderList('wfh', 'wfh-list');
+    fetchAndRenderList('admit_card', 'admit-card-list');
+    fetchAndRenderList('news', 'news-list');
+	fetchAndRenderList('books', 'books-list');
+	fetchAndRenderList('trending', 'trending-news');
+
+    /* --- POPUP / MODAL LOGIC --- */
+    const modal = document.getElementById('articleModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = document.getElementById('closeModalBtn');
+
+    function openModal(title, content) {
+        modalTitle.innerText = title;
+        modalBody.innerHTML = content;
+        modal.style.display = 'flex'; 
+    }
+    function closeModal() { modal.style.display = 'none'; }
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+
+</script>
+</body>
+</html>
