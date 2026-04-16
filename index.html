@@ -28,16 +28,16 @@
             padding: 20px;
             font-size: 24px;
             letter-spacing: 2px;
+            position: relative;
         }
 
         /* Main Content Grid */
         main {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
             gap: 15px;
             padding: 20px;
             flex-grow: 1;
-            overflow: hidden; /* Keeps the main container from scrolling */
+            overflow: hidden;
         }
 
         /* Individual Columns */
@@ -60,11 +60,11 @@
         /* Scrollable List inside Columns */
         .scrollable-list {
             flex-grow: 1;
-            overflow-y: auto; /* Enables vertical scrolling */
+            overflow-y: auto;
             padding: 10px;
         }
 
-        /* Custom Scrollbar for better UI */
+        /* Custom Scrollbar */
         .scrollable-list::-webkit-scrollbar {
             width: 5px;
         }
@@ -91,6 +91,7 @@
             flex-grow: 1;
         }
 
+        /* Buttons */
         .know-more-btn {
             background: none;
             border: none;
@@ -100,6 +101,57 @@
             font-size: 12px;
             margin-left: 5px;
             white-space: nowrap;
+        }
+
+        .save-fav-btn {
+            background: none;
+            border: none;
+            color: red;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        .remove-fav-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 10px 20px;
+            gap: 10px;
+            background-color: #f4f4f4;
+        }
+        
+        .page-btn {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .page-btn:hover {
+            background-color: #ddd;
+        }
+        
+        .page-btn.active {
+            background-color: black;
+            color: white;
         }
 
         /* Footer */
@@ -114,7 +166,7 @@
 
         /* --- POPUP / MODAL STYLES --- */
         .modal-overlay {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
@@ -161,27 +213,48 @@
             line-height: 1.6;
         }
 
-        /* Responsive design for smaller screens */
+       /* --- Responsive design for smaller screens --- */
         @media (max-width: 1024px) {
-            main { grid-template-columns: repeat(3, 1fr); overflow-y: auto; }
-            .column { min-height: 400px; }
+            body {
+                height: auto; 
+            }
+            main { 
+                overflow: visible; 
+            }
+            .column { 
+                height: 400px; 
+            }
         }
+
         @media (max-width: 768px) {
-            main { grid-template-columns: 1fr; }
+            main { 
+                gap: 25px; 
+                padding: 20px 0px 20px 20px; 
+                border-right: 70px solid transparent;
+            }
+            .column {
+                height: 350px; 
+            }
+            .scrollable-list {
+                overscroll-behavior: contain; 
+            }
         }
     </style>
 </head>
 <body>
 
     <header>
+        <img src="images/homelogo.png" id="home-logo" alt="Home Logo" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
+        
         NEWS HEADLINE
+
+        <img src="images/favourite.png" id="fav-logo" alt="Favorite Logo" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
     </header>
 
-    <main>
+    <main id="main-grid">
         <div class="column">
             <h2>GOV JOB</h2>
-            <div class="scrollable-list" id="gov-job-list">
-                </div>
+            <div class="scrollable-list" id="gov-job-list"></div>
         </div>
 
         <div class="column">
@@ -203,21 +276,23 @@
             <h2>JOB RELATED NEWS</h2>
             <div class="scrollable-list" id="news-list"></div>
         </div>
-	<div class="column">
+        
+	    <div class="column">
             <h2>IMPORTANT BOOKS</h2>
             <div class="scrollable-list" id="books-list"></div>
         </div>
 
-	<div class="column">
+	    <div class="column">
             <h2>TRENDING JOB</h2>
             <div class="scrollable-list" id="trending-news"></div>
         </div>
-
     </main>
 
+    <div class="pagination" id="pagination-controls"></div>
+
     <footer>
-        <div>ABOUT US</div>
-        <div>CONT. NO</div>
+        <div id="about-us-btn" style="cursor: pointer;">ABOUT US</div>
+        <div id="contact-btn" style="cursor: pointer;">CONT. NO</div>
     </footer>
 
     <div class="modal-overlay" id="articleModal">
@@ -254,27 +329,24 @@
 
     /* --- DATE FORMATTING LOGIC --- */
     function formatFirebaseDate(firebaseTimestamp) {
-        if (!firebaseTimestamp) return ''; // If no date exists, show nothing
+        if (!firebaseTimestamp) return ''; 
         
-        const date = firebaseTimestamp.toDate(); // Convert Firebase time to normal time
+        const date = firebaseTimestamp.toDate(); 
         
-        // Get day with st, nd, rd, th
         const day = date.getDate();
         const suffix = (day % 10 === 1 && day !== 11) ? 'st' :
                        (day % 10 === 2 && day !== 12) ? 'nd' :
                        (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
         
-        // Get month name
         const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
         const month = monthNames[date.getMonth()];
         const year = date.getFullYear();
         
-        // Formate time (12-hour AM/PM)
         let hours = date.getHours();
         const minutes = date.getMinutes().toString().padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
+        hours = hours ? hours : 12; 
 
         return ` ${day}${suffix} ${month} ${year} , ${hours}:${minutes} ${ampm} `;
     }
@@ -284,10 +356,9 @@
         const container = document.getElementById(elementId);
         container.innerHTML = '<span style="padding:10px; font-size:12px;">Loading updates...</span>'; 
 
-        // Query the 'posts' collection and order by newest first!
         db.collection('posts')
           .where('category', '==', category)
-          .orderBy('createdAt', 'desc') // Sorts so newest dates are at the top
+          .orderBy('createdAt', 'desc') 
           .get()
         .then((snapshot) => {
             container.innerHTML = ''; 
@@ -304,14 +375,13 @@
                 
                 const titleText = item.title ? item.title : 'No Title';
                 const contentHTML = item.content ? item.content : 'No Content';
-                
-                // Create the date text if a date exists in Firebase
                 const dateText = item.createdAt ? `<span style="font-size: 11px; color: #666; margin-left: 5px;">${formatFirebaseDate(item.createdAt)}</span>` : '';
 
                 div.innerHTML = `
                     <span class="bullet">•</span>
                     <span class="headline">${titleText}${dateText}
                         <button class="know-more-btn">[know more]</button>
+                        <button class="save-fav-btn">[save to favourite]</button>
                     </span>
                 `;
                 
@@ -320,12 +390,25 @@
                     openModal(titleText, contentHTML);
                 });
 
+                const favBtn = div.querySelector('.save-fav-btn');
+                favBtn.addEventListener('click', () => {
+                    let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+                    const exists = favorites.some(fav => fav.title === titleText);
+                    if (!exists) {
+                        favorites.push({ title: titleText, content: contentHTML, date: dateText });
+                        localStorage.setItem('myFavArticles', JSON.stringify(favorites));
+                        favBtn.innerText = '[saved]';
+                        favBtn.style.color = 'gray';
+                    } else {
+                        alert('This article is already in your favorites!');
+                    }
+                });
+
                 container.appendChild(div);
             });
         })
         .catch((error) => {
             console.error("Error getting documents: ", error);
-            // If the index isn't built yet, we fallback to a simpler query without ordering
             if(error.message.includes("index")) {
                  console.warn("Please create the Firebase index by clicking the link in the console error to enable sorting.");
                  fallbackFetchAndRenderList(category, elementId);
@@ -335,7 +418,6 @@
         });
     }
 
-    // Fallback if sorting fails before you create the Firebase index
     function fallbackFetchAndRenderList(category, elementId) {
         const container = document.getElementById(elementId);
         db.collection('posts').where('category', '==', category).get().then((snapshot) => {
@@ -345,11 +427,35 @@
                 const item = doc.data();
                 const div = document.createElement('div');
                 div.className = 'list-item';
+                
                 const titleText = item.title || 'No Title';
                 const contentHTML = item.content || 'No Content';
                 const dateText = item.createdAt ? `<span style="font-size: 11px; color: #666; margin-left: 5px;">${formatFirebaseDate(item.createdAt)}</span>` : '';
-                div.innerHTML = `<span class="bullet">•</span><span class="headline">${titleText}${dateText}<button class="know-more-btn">[know more]</button></span>`;
+                
+                div.innerHTML = `
+                    <span class="bullet">•</span>
+                    <span class="headline">${titleText}${dateText}
+                        <button class="know-more-btn">[know more]</button>
+                        <button class="save-fav-btn">[save to favourite]</button>
+                    </span>
+                `;
+                
                 div.querySelector('.know-more-btn').addEventListener('click', () => openModal(titleText, contentHTML));
+                
+                const favBtn = div.querySelector('.save-fav-btn');
+                favBtn.addEventListener('click', () => {
+                    let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+                    const exists = favorites.some(fav => fav.title === titleText);
+                    if (!exists) {
+                        favorites.push({ title: titleText, content: contentHTML, date: dateText });
+                        localStorage.setItem('myFavArticles', JSON.stringify(favorites));
+                        favBtn.innerText = '[saved]';
+                        favBtn.style.color = 'gray';
+                    } else {
+                        alert('This article is already in your favorites!');
+                    }
+                });
+                
                 container.appendChild(div);
             });
         });
@@ -377,6 +483,146 @@
     function closeModal() { modal.style.display = 'none'; }
     closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+
+    /* --- PAGINATION LOGIC --- */
+    const columns = document.querySelectorAll('.column');
+    const paginationContainer = document.getElementById('pagination-controls');
+    const mainGrid = document.getElementById('main-grid');
+    let currentPage = 1;
+
+    function getColumnsPerPage() {
+        if (window.innerWidth > 1024) return 5; // Desktop
+        if (window.innerWidth > 768) return 3;  // Tablet
+        return 5;                               // Mobile (Displays 5 stacked vertically)
+    }
+
+    function renderPagination() {
+        const colsPerPage = getColumnsPerPage();
+        const totalPages = Math.ceil(columns.length / colsPerPage);
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        let visibleCount = 0;
+
+        columns.forEach((col, index) => {
+            const start = (currentPage - 1) * colsPerPage;
+            const end = start + colsPerPage;
+
+            if (index >= start && index < end) {
+                col.style.display = 'flex'; 
+                visibleCount++;
+            } else {
+                col.style.display = 'none'; 
+            }
+        });
+
+        if (window.innerWidth > 768) {
+            mainGrid.style.gridTemplateColumns = `repeat(${visibleCount}, 1fr)`;
+        } else {
+            mainGrid.style.gridTemplateColumns = `1fr`;
+        }
+
+        paginationContainer.innerHTML = '';
+        if (totalPages > 1) {
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderPagination(); 
+                };
+                paginationContainer.appendChild(btn);
+            }
+        }
+    }
+
+    window.addEventListener('resize', renderPagination);
+    renderPagination();
+
+    /* --- FOOTER BUTTONS LOGIC --- */
+    const aboutUsBtn = document.getElementById('about-us-btn');
+    const contactBtn = document.getElementById('contact-btn');
+
+    aboutUsBtn.addEventListener('click', () => {
+        const demoAboutText = `
+            <h4>Welcome to the News & Job Portal!</h4>
+            <br>
+            <p>This is a demo text for the About Us section. We are dedicated to providing you with the latest updates on government jobs, private jobs, work-from-home opportunities, and trending news.</p>
+            <br>
+            <p>Our goal is to make job hunting easier and more accessible for everyone.</p>
+        `;
+        openModal("ABOUT US", demoAboutText);
+    });
+
+    contactBtn.addEventListener('click', () => {
+        const demoContactText = `
+            <h4>Contact Information</h4>
+            <br>
+            <p><strong>Phone:</strong> +91-9876543210 (Demo)</p>
+            <p><strong>Email:</strong> support@demo-news-portal.com</p>
+            <p><strong>Office Hours:</strong> Monday - Friday, 9:00 AM to 5:00 PM</p>
+        `;
+        openModal("CONTACT NUMBER", demoContactText);
+    });
+
+    /* --- LOGO CLICK LOGIC --- */
+    const homeLogo = document.getElementById('home-logo');
+    if (homeLogo) {
+        homeLogo.addEventListener('click', () => {
+            currentPage = 1;
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    /* --- FAVORITES VIEW & DELETE LOGIC --- */
+    const favLogo = document.getElementById('fav-logo');
+    if (favLogo) {
+        favLogo.addEventListener('click', openFavoritesModal);
+    }
+
+    function openFavoritesModal() {
+        let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+
+        if (favorites.length === 0) {
+            openModal("YOUR FAVORITES", "<p>You haven't saved any articles yet.</p>");
+            return;
+        }
+
+        let html = '<div>';
+        favorites.forEach((fav, index) => {
+            html += `
+                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${fav.title}</strong> ${fav.date}
+                        <br>
+                        <button class="know-more-btn" style="margin-left:0; margin-top:5px;" onclick="viewFavContent(${index})">[read article]</button>
+                    </div>
+                    <button class="remove-fav-btn" onclick="removeFavorite(${index})">Delete</button>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        openModal("YOUR FAVORITES", html);
+    }
+
+    window.removeFavorite = function(index) {
+        let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+        favorites.splice(index, 1); 
+        localStorage.setItem('myFavArticles', JSON.stringify(favorites)); 
+        openFavoritesModal(); 
+    };
+
+    window.viewFavContent = function(index) {
+        let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+        const fav = favorites[index];
+        
+        const backBtnHTML = `<br><br><hr><br><button onclick="openFavoritesModal()" style="padding: 5px 10px; cursor: pointer;">⬅ Back to Favorites</button>`;
+        openModal(fav.title, fav.content + backBtnHTML);
+    };
 
 </script>
 </body>
