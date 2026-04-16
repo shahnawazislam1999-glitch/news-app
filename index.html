@@ -248,6 +248,8 @@
         
         NEWS HEADLINE
 
+        <img src="images/shortcut.png" id="shortcut-logo" alt="Shortcut Logo" style="position: absolute; right: 70px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
+
         <img src="images/favourite.png" id="fav-logo" alt="Favorite Logo" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
     </header>
 
@@ -624,6 +626,71 @@
         openModal(fav.title, fav.content + backBtnHTML);
     };
 
+
+
+/* --- SHORTCUT MENU LOGIC --- */
+    const shortcutLogo = document.getElementById('shortcut-logo');
+
+    if (shortcutLogo) {
+        shortcutLogo.addEventListener('click', openShortcutMenu);
+    }
+
+    function openShortcutMenu() {
+        // Find all columns dynamically
+        const allColumns = document.querySelectorAll('.column');
+        
+        let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+
+        // Loop through each column to get its H2 title and create a button
+        allColumns.forEach((col, index) => {
+            const categoryName = col.querySelector('h2').innerText;
+            html += `
+                <button onclick="scrollToCategory(${index})" 
+                        style="padding: 12px; background: white; border: 2px solid black; cursor: pointer; text-align: left; font-weight: bold; font-size: 14px; transition: 0.2s;">
+                    ${categoryName}
+                </button>`;
+        });
+
+        html += '</div>';
+
+        // Reuse your existing modal to show the list
+        openModal("CATEGORY SHORTCUTS", html);
+    }
+
+    window.scrollToCategory = function(index) {
+        // Calculate which page this category is on based on your pagination logic
+        const colsPerPage = getColumnsPerPage();
+        const targetPage = Math.floor(index / colsPerPage) + 1;
+
+        // Change the page if the category is not on the current page
+        if (currentPage !== targetPage) {
+            currentPage = targetPage;
+            renderPagination();
+        }
+
+        // Close the popup window
+        closeModal();
+
+        // Add a tiny delay to ensure the page renders before scrolling
+        setTimeout(() => {
+            const targetCol = document.querySelectorAll('.column')[index];
+            // Subtracting some margin to account for the fixed header
+            const yOffset = -80; 
+            const y = targetCol.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({ top: y, behavior: 'smooth' });
+            
+            // Highlight the column briefly so the user sees what they clicked
+            const originalBg = targetCol.style.backgroundColor;
+            targetCol.style.backgroundColor = '#ffffcc';
+            setTimeout(() => {
+                targetCol.style.backgroundColor = originalBg;
+            }, 1000);
+        }, 50);
+    };
+
+
 </script>
 </body>
 </html>
+```
