@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News & Job Portal</title>
@@ -20,6 +21,7 @@
             background-color: #f4f4f4;
         }
 
+        
         /* Header */
         header {
             background-color: black;
@@ -28,7 +30,10 @@
             padding: 20px;
             font-size: 24px;
             letter-spacing: 2px;
-            position: relative;
+            /* New properties for fixed scrolling */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         /* Main Content Grid */
@@ -213,6 +218,23 @@
             line-height: 1.6;
         }
 
+
+	/* Save to Home Icon Default (Hidden on Desktop) */
+        #install-icon {
+            display: none; 
+            position: fixed;
+            top: 85px; /* Positions it just below the header */
+            right: 15px; /* Positions it on the right side */
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            z-index: 999;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+	
+
        /* --- Responsive design for smaller screens --- */
         @media (max-width: 1024px) {
             body {
@@ -227,6 +249,10 @@
         }
 
         @media (max-width: 768px) {
+            /* Show the install icon on mobile */
+            #install-icon {
+                display: block; 
+            }
             main { 
                 gap: 25px; 
                 padding: 20px 0px 20px 20px; 
@@ -255,11 +281,18 @@
         <img src="images/shortcut.png" id="shortcut-logo" alt="Shortcut Logo" style="position: absolute; right:60px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
     </header>
 
+	<img src="images/savetohome.png" id="install-icon" alt="Save to Home Screen" title="Install App">
+
     <main id="main-grid">
         <div class="column">
-            <h2>GOV JOB</h2>
-            <div class="scrollable-list" id="gov-job-list"></div>
+            <h2>NEW NOTIFICATION</h2>
+            <div class="scrollable-list" id="new-notification-list"></div>
         </div>
+
+	<div class="column">
+        <h2>CENTRAL JOB</h2>
+        <div class="scrollable-list" id="central-job-list"></div>
+    </div>
 
         <div class="column">
             <h2>PVT JOB</h2>
@@ -467,13 +500,14 @@
         });
     }
 
-    fetchAndRenderList('gov_job', 'gov-job-list');
+    fetchAndRenderList('new_notification', 'new-notification-list');
     fetchAndRenderList('pvt_job', 'pvt-job-list');
     fetchAndRenderList('wfh', 'wfh-list');
     fetchAndRenderList('admit_card', 'admit-card-list');
     fetchAndRenderList('news', 'news-list');
 	fetchAndRenderList('books', 'books-list');
 	fetchAndRenderList('trending', 'trending-news');
+	fetchAndRenderList('central_job', 'central-job-list');
 
     /* --- POPUP / MODAL LOGIC --- */
     const modal = document.getElementById('articleModal');
@@ -801,6 +835,37 @@
             resultsContainer.innerHTML = '<p style="font-size: 12px; color: red; text-align: center; margin-top: 20px;">Error performing search. Please try again.</p>';
         });
     }
+
+
+
+		/* --- ADD TO HOME SCREEN (PWA) LOGIC --- */
+    let deferredPrompt;
+    const installIcon = document.getElementById('install-icon');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+    });
+
+    if (installIcon) {
+        installIcon.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User install prompt outcome: ${outcome}`);
+                // We've used the prompt, and can't use it again, throw it away
+                deferredPrompt = null;
+            } else {
+                // Fallback for iOS or browsers that don't support the web prompt natively
+                alert("To install this app, tap your browser's menu (or Share icon on iOS) and select 'Add to Home Screen'.");
+            }
+        });
+    }
+
 
 </script>
 </body>
