@@ -246,11 +246,13 @@
     <header>
         <img src="images/homelogo.png" id="home-logo" alt="Home Logo" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
         
-        NEWS HEADLINE
+        <img src="images/search.png" id="search-logo" alt="Search Logo" style="position: absolute; left: 70px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
+        
+        ASSAM JOBS
 
-        <img src="images/shortcut.png" id="shortcut-logo" alt="Shortcut Logo" style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
+	<img src="images/favourite.png" id="fav-logo" alt="Favorite Logo" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
 
-        <img src="images/favourite.png" id="fav-logo" alt="Favorite Logo" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
+        <img src="images/shortcut.png" id="shortcut-logo" alt="Shortcut Logo" style="position: absolute; right:60px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
     </header>
 
     <main id="main-grid">
@@ -689,8 +691,115 @@
         }, 50);
     };
 
+    /* --- SEARCH LOGIC --- */
+    const searchLogo = document.getElementById('search-logo');
+
+    // 1. DEFINE THE FUNCTION FIRST
+    window.openSearchModal = function() {
+        const searchHTML = `
+            <input type="text" id="searchInput" placeholder="Search articles by keyword..." autocomplete="off" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid black; border-radius: 4px; font-size: 14px;">
+            <div id="searchResults" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">Start typing to search...</p>
+            </div>
+        `;
+        
+        // Reuse the existing openModal function
+        openModal("SEARCH ARTICLES", searchHTML);
+
+        // Attach listener to the input field so it searches dynamically as the user types
+        const searchInput = document.getElementById('searchInput');
+        
+        // Small delay (debounce) to prevent making too many requests while typing fast
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const searchTerm = e.target.value.toLowerCase().trim();
+            searchTimeout = setTimeout(() => {
+                performSearch(searchTerm);
+            }, 300); // Waits 300ms after the user stops typing
+        });
+        
+        // Focus the input field immediately when the modal opens
+        setTimeout(() => searchInput.focus(), 100);
+    }
+
+    // 2. THEN ATTACH THE CLICK EVENT TO THE LOGO
+    if (searchLogo) {
+        searchLogo.addEventListener('click', window.openSearchModal);
+    }
+
+    // Function to search Firebase and render results
+    function performSearch(term) {
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (term.length < 2) {
+            resultsContainer.innerHTML = '<p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">Start typing to search (minimum 2 characters)...</p>';
+            return;
+        }
+
+        resultsContainer.innerHTML = '<p style="font-size: 12px; color: black; text-align: center; margin-top: 20px;">Searching...</p>';
+
+        // Fetch all posts to filter them client-side for substring matching
+        db.collection('posts').get().then((snapshot) => {
+            resultsContainer.innerHTML = '';
+            let found = false;
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const titleText = item.title ? item.title : 'No Title';
+                const contentHTML = item.content ? item.content : 'No Content';
+                const dateText = item.createdAt ? `<span style="font-size: 11px; color: #666; margin-left: 5px;">${formatFirebaseDate(item.createdAt)}</span>` : '';
+
+                // Case-insensitive check if the search term exists in the title or content
+                if (titleText.toLowerCase().includes(term) || contentHTML.toLowerCase().includes(term)) {
+                    found = true;
+                    
+                    const div = document.createElement('div');
+                    div.style.cssText = "margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd; line-height: 1.4;";
+                    
+                    div.innerHTML = `
+                        <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${titleText} ${dateText}</div>
+                        <div>
+                            <button class="know-more-btn" style="margin-left: 0;">[read article]</button>
+                            <button class="save-fav-btn">[save to favourite]</button>
+                        </div>
+                    `;
+                    
+                    // Attach event to read the article and return back to search
+                    div.querySelector('.know-more-btn').addEventListener('click', () => {
+                        const backBtnHTML = '<br><br><hr style="border: 1px solid #ddd;"><br><button onclick="openSearchModal()" style="padding: 8px 12px; cursor: pointer; background: black; color: white; border: none; border-radius: 4px; font-weight: bold;">⬅ Back to Search</button>';
+                        openModal(titleText, contentHTML + backBtnHTML);
+                    });
+
+                    // Attach event to save to favorites
+                    const favBtn = div.querySelector('.save-fav-btn');
+                    favBtn.addEventListener('click', () => {
+                        let favorites = JSON.parse(localStorage.getItem('myFavArticles')) || [];
+                        const exists = favorites.some(fav => fav.title === titleText);
+                        
+                        if (!exists) {
+                            favorites.push({ title: titleText, content: contentHTML, date: dateText });
+                            localStorage.setItem('myFavArticles', JSON.stringify(favorites));
+                            favBtn.innerText = '[saved]';
+                            favBtn.style.color = 'gray';
+                        } else {
+                            alert('This article is already in your favorites!');
+                        }
+                    });
+
+                    resultsContainer.appendChild(div);
+                }
+            });
+
+            if (!found) {
+                resultsContainer.innerHTML = '<p style="font-size: 12px; color: red; text-align: center; margin-top: 20px;">No articles found matching your search.</p>';
+            }
+        }).catch(error => {
+            console.error("Search error:", error);
+            resultsContainer.innerHTML = '<p style="font-size: 12px; color: red; text-align: center; margin-top: 20px;">Error performing search. Please try again.</p>';
+        });
+    }
 
 </script>
 </body>
 </html>
-```
