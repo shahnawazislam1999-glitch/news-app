@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Article...</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background-color: #f4f4f4; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: black; color: white; text-align: center; padding: 20px; font-size: 24px; position: sticky; top: 0; }
+        .back-btn { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: white; text-decoration: none; font-size: 16px; font-weight: bold; }
+        main { background-color: white; max-width: 800px; margin: 20px auto; padding: 30px; border: 2px solid black; flex-grow: 1; width: 95%; }
+        h1 { border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; font-size: 22px; }
+        .date-text { font-size: 12px; color: #666; margin-bottom: 20px; display: block; }
+        .content { line-height: 1.6; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">⬅ Back</a>
+        ASSAM JOBS
+    </header>
+
+    <main>
+        <div id="article-container">
+            <h1 id="article-title">Loading...</h1>
+            <div id="article-content" class="content">Please wait while we fetch the details.</div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Use your existing Firebase configuration here
+        const firebaseConfig = {
+            apiKey: "AIzaSyCToPB-kbQgfr-QEB_zelN-8NjYDIfcfQw",
+            authDomain: "news-app-67878.firebaseapp.com",
+            projectId: "news-app-67878",
+            storageBucket: "news-app-67878.firebasestorage.app",
+            messagingSenderId: "289992061814",
+            appId: "1:289992061814:web:bfb6a93d4082f5b6354057"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Function to format the date (copied from your index.html)
+        function formatFirebaseDate(firebaseTimestamp) {
+            if (!firebaseTimestamp) return ''; 
+            const date = firebaseTimestamp.toDate(); 
+            const day = date.getDate();
+            const suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+            const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12; hours = hours ? hours : 12; 
+            return `${day}${suffix} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+        }
+
+        // Get the post ID from the URL (e.g., ?id=XYZ123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+
+        if (postId) {
+            // Fetch that specific document from Firebase
+            db.collection('posts').doc(postId).get().then((doc) => {
+                if (doc.exists) {
+                    const item = doc.data();
+                    
+                    // Change the page title for SEO!
+                    document.title = item.title + " - Assam Jobs";
+                    
+                    const dateText = item.createdAt ? `<span class="date-text">Published on: ${formatFirebaseDate(item.createdAt)}</span>` : '';
+                    
+                    document.getElementById('article-title').innerText = item.title;
+                    document.getElementById('article-content').innerHTML = dateText + item.content;
+                } else {
+                    document.getElementById('article-title').innerText = "Article Not Found";
+                    document.getElementById('article-content').innerHTML = "This job post might have been removed.";
+                }
+            }).catch((error) => {
+                document.getElementById('article-title').innerText = "Error";
+                document.getElementById('article-content').innerHTML = "Error loading article.";
+                console.error("Error fetching document:", error);
+            });
+        } else {
+            document.getElementById('article-title').innerText = "No Article Specified";
+            document.getElementById('article-content').innerHTML = "Return to the homepage to select an article.";
+        }
+    </script>
+</body>
+</html>
