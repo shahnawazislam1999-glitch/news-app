@@ -290,13 +290,13 @@
         </div>
 
 	<div class="column">
-        <h2>CENTRAL JOB</h2>
-        <div class="scrollable-list" id="central-job-list"></div>
+        <h2>ASSAM GOV JOB</h2>
+        <div class="scrollable-list" id="assam-gov-job-list"></div>
     </div>
 
         <div class="column">
-            <h2>PVT JOB</h2>
-            <div class="scrollable-list" id="pvt-job-list"></div>
+            <h2>ASSAM PVT JOB</h2>
+            <div class="scrollable-list" id="assam-pvt-job-list"></div>
         </div>
 
         <div class="column">
@@ -426,6 +426,11 @@
                 
                 const btn = div.querySelector('.know-more-btn');
                 btn.addEventListener('click', () => {
+                    // NEW LOGIC: Tell Firebase to add +1 to the views field for this specific document
+                    db.collection('posts').doc(doc.id).update({
+                        views: firebase.firestore.FieldValue.increment(1)
+                    }).catch(err => console.log("Error updating views", err));
+                    
                     openModal(titleText, contentHTML);
                 });
 
@@ -479,7 +484,17 @@
                     </span>
                 `;
                 
-                div.querySelector('.know-more-btn').addEventListener('click', () => openModal(titleText, contentHTML));
+                
+
+		const btn = div.querySelector('.know-more-btn');
+                btn.addEventListener('click', () => {
+                    // NEW LOGIC: Tell Firebase to add +1 to the views field
+                    db.collection('posts').doc(doc.id).update({
+                        views: firebase.firestore.FieldValue.increment(1)
+                    }).catch(err => console.log("Error updating views", err));
+                    
+                    openModal(titleText, contentHTML);
+                });
                 
                 const favBtn = div.querySelector('.save-fav-btn');
                 favBtn.addEventListener('click', () => {
@@ -501,13 +516,13 @@
     }
 
     fetchAndRenderList('new_notification', 'new-notification-list');
-    fetchAndRenderList('pvt_job', 'pvt-job-list');
+    fetchAndRenderList('pvt_job', 'assam-pvt-job-list');
     fetchAndRenderList('wfh', 'wfh-list');
     fetchAndRenderList('admit_card', 'admit-card-list');
     fetchAndRenderList('news', 'news-list');
 	fetchAndRenderList('books', 'books-list');
 	fetchAndRenderList('trending', 'trending-news');
-	fetchAndRenderList('central_job', 'central-job-list');
+	fetchAndRenderList('assam_govtjob', 'assam-gov-job-list');
 
     /* --- POPUP / MODAL LOGIC --- */
     const modal = document.getElementById('articleModal');
@@ -803,6 +818,12 @@
                     
                     // Attach event to read the article and return back to search
                     div.querySelector('.know-more-btn').addEventListener('click', () => {
+                        
+                        // NEW LOGIC: Count the view when clicked from Search!
+                        db.collection('posts').doc(doc.id).update({
+                            views: firebase.firestore.FieldValue.increment(1)
+                        }).catch(err => console.log("Error updating views", err));
+
                         const backBtnHTML = '<br><br><hr style="border: 1px solid #ddd;"><br><button onclick="openSearchModal()" style="padding: 8px 12px; cursor: pointer; background: black; color: white; border: none; border-radius: 4px; font-weight: bold;">⬅ Back to Search</button>';
                         openModal(titleText, contentHTML + backBtnHTML);
                     });
