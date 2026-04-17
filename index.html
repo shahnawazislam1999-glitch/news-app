@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News & Job Portal</title>
-    <style>
+
+		<meta name="description" content="Your ultimate portal for Assam government jobs, private sector vacancies, and competitive exam preparation, featuring dedicated study strategies for teaching exams, CTET, and state-level notifications.">
+    <meta name="keywords" content="Assam jobs, govt jobs Assam, CTET preparation, admit card, work from home, competitive exams Assam">
+    <meta name="author" content="Assam Jobs Portal">
+    
+<style>
         /* --- CSS STYLES --- */
         * {
             box-sizing: border-box;
@@ -218,6 +223,67 @@
             line-height: 1.6;
         }
 
+	/* SEO Welcome Box Default */
+.seo-box {
+    background-color: white;
+    padding: 20px;
+    margin: 20px 20px 0 20px;
+    border: 2px solid black;
+    text-align: center;
+}
+
+	
+/* --- WhatsApp Icon Default (Desktop - Right side in header) --- */
+        #whatsapp-icon {
+            position: absolute;
+            right: 105px; /* Changed from left to right */
+            top: 50%;
+            transform: translateY(-50%);
+            height: 35px;
+            width: 35px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+
+	/* --- BLINKING RED DOT --- */
+.blinking-dot {
+    height: 12px;
+    width: 12px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px; /* Creates a small gap between the dot and the text */
+    vertical-align: middle; /* Keeps the dot aligned with the text */
+    animation: blink-animation 1s infinite;
+}
+
+
+
+
+/* --- BURNING FIRE ICON --- */
+        .fire-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 18px; /* Adjusts the size of the emoji */
+            vertical-align: middle;
+            animation: flicker-animation 0.6s infinite alternate;
+        }
+
+        @keyframes flicker-animation {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            50% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+            100% { transform: scale(0.95) rotate(-1deg); opacity: 0.8; }
+        }
+
+
+
+@keyframes blink-animation {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 
 	/* Save to Home Icon Default (Hidden on Desktop) */
         #install-icon {
@@ -253,11 +319,41 @@
             #install-icon {
                 display: block; 
             }
+            
+            /* --- Move WhatsApp Icon to bottom right --- */
+            #whatsapp-icon {
+                position: fixed;
+                top: 140px; 
+                right: 15px; 
+                left: auto; 
+                transform: none; 
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                background-color: white; 
+            }
+
+            /* Stacks the footer items on mobile */
+            footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            /* --- NEW: 70px gap for the Welcome Box --- */
+            .seo-box {
+                margin-right: 70px;
+            }
+
+            /* --- UPDATED: 70px gap for the Job Columns --- */
             main { 
                 gap: 25px; 
                 padding: 20px 0px 20px 20px; 
-                border-right: 70px solid transparent;
+                margin-right: 70px; /* This creates the scroll lane */
+                border-right: none;
             }
+
             .column {
                 height: 350px; 
             }
@@ -273,7 +369,10 @@
         <img src="images/homelogo.png" id="home-logo" alt="Home Logo" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
         
         <img src="images/search.png" id="search-logo" alt="Search Logo" style="position: absolute; left: 70px; top: 50%; transform: translateY(-50%); height: 35px; cursor: pointer;">
-        
+         
+	<a href="https://wa.me/918399964358" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" id="whatsapp-icon" alt="WhatsApp">
+        </a>
         ASSAM JOBS
 
 	<img src="images/favourite.png" id="fav-logo" alt="Favorite Logo" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); height: 40px; cursor: pointer;">
@@ -283,14 +382,22 @@
 
 	<img src="images/savetohome.png" id="install-icon" alt="Save to Home Screen" title="Install App">
 
+
+	<div class="seo-box">
+        <h1 style="font-size: 18px; margin-bottom: 10px;">Welcome to the Assam Jobs & Education Portal</h1>
+        <p style="font-size: 14px; line-height: 1.6; color: #333;">
+            Your dedicated resource for the latest Assam government job notifications, private sector vacancies, and verified work-from-home opportunities. We provide detailed exam breakdowns, admit card updates, and strategic study guides tailored for competitive exams including the CTET, Assam TET, and UPSC. Browse our daily updates below to find trending career opportunities and recommended study materials.
+        </p>
+    </div>
+	
     <main id="main-grid">
         <div class="column">
-            <h2>NEW NOTIFICATION</h2>
-            <div class="scrollable-list" id="new-notification-list"></div>
-        </div>
+    <h2><span class="blinking-dot"></span>NEW NOTIFICATION</h2>
+    <div class="scrollable-list" id="new-notification-list"></div>
+</div>
 
 	<div class="column">
-        <h2>ASSAM GOV JOB</h2>
+        <h2><span class="fire-icon">🔥</span>ASSAM GOV JOB</h2>
         <div class="scrollable-list" id="assam-gov-job-list"></div>
     </div>
 
@@ -327,9 +434,30 @@
 
     <div class="pagination" id="pagination-controls"></div>
 
-    <footer>
-        <div id="about-us-btn" style="cursor: pointer;">ABOUT US</div>
-        <div id="contact-btn" style="cursor: pointer;">CONT. NO</div>
+	<div style="background-color: #e9ecef; padding: 20px; text-align: center; font-size: 14px;">
+        <h3 style="margin-bottom: 10px; font-size: 16px;">Browse Categories</h3>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+            <a href="#new-notification-list" onclick="scrollToCategory(0); return false;" style="color: black; text-decoration: none;">New Notifications</a> |
+            <a href="#assam-gov-job-list" onclick="scrollToCategory(1); return false;" style="color: black; text-decoration: none;">Assam Govt Jobs</a> |
+            <a href="#assam-pvt-job-list" onclick="scrollToCategory(2); return false;" style="color: black; text-decoration: none;">Assam Pvt Jobs</a> |
+            <a href="#wfh-list" onclick="scrollToCategory(3); return false;" style="color: black; text-decoration: none;">Work From Home</a> |
+            <a href="#admit-card-list" onclick="scrollToCategory(4); return false;" style="color: black; text-decoration: none;">Admit Cards</a> |
+            <a href="#books-list" onclick="scrollToCategory(6); return false;" style="color: black; text-decoration: none;">Important Books</a>
+        </div>
+    </div>
+
+    <footer style="flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+            <a href="about.html" style="color: white; text-decoration: none; font-size: 12px; letter-spacing: 1px;">ABOUT US</a>
+            <a href="contact.html" style="color: white; text-decoration: none; font-size: 12px; letter-spacing: 1px;">CONTACT US</a>
+            <a href="privacy-policy.html" style="color: white; text-decoration: none; font-size: 12px; letter-spacing: 1px;">PRIVACY POLICY</a>
+            <a href="disclaimer.html" style="color: white; text-decoration: none; font-size: 12px; letter-spacing: 1px;">DISCLAIMER</a>
+            <a href="terms.html" style="color: white; text-decoration: none; font-size: 12px; letter-spacing: 1px;">TERMS & CONDITIONS</a>
+        </div>
+        
+        <div id="copyright-text" style="font-size: 12px; color: #ccc; text-align: center;">
+            &copy; 2026 Assam Jobs. All rights reserved.
+        </div>
     </footer>
 
     <div class="modal-overlay" id="articleModal">
@@ -426,12 +554,13 @@
                 
                 const btn = div.querySelector('.know-more-btn');
                 btn.addEventListener('click', () => {
-                    // NEW LOGIC: Tell Firebase to add +1 to the views field for this specific document
+                    // NEW LOGIC: Tell Firebase to add +1 to the views field
                     db.collection('posts').doc(doc.id).update({
                         views: firebase.firestore.FieldValue.increment(1)
                     }).catch(err => console.log("Error updating views", err));
                     
-                    openModal(titleText, contentHTML);
+                    // Redirect to the new article page!
+                    window.location.href = `article.html?id=${doc.id}`;
                 });
 
                 const favBtn = div.querySelector('.save-fav-btn');
@@ -493,7 +622,8 @@
                         views: firebase.firestore.FieldValue.increment(1)
                     }).catch(err => console.log("Error updating views", err));
                     
-                    openModal(titleText, contentHTML);
+                    // Redirect to the new article page!
+                    window.location.href = `article.html?id=${doc.id}`;
                 });
                 
                 const favBtn = div.querySelector('.save-fav-btn');
@@ -596,31 +726,6 @@
     window.addEventListener('resize', renderPagination);
     renderPagination();
 
-    /* --- FOOTER BUTTONS LOGIC --- */
-    const aboutUsBtn = document.getElementById('about-us-btn');
-    const contactBtn = document.getElementById('contact-btn');
-
-    aboutUsBtn.addEventListener('click', () => {
-        const demoAboutText = `
-            <h4>Welcome to the News & Job Portal!</h4>
-            <br>
-            <p>This is a demo text for the About Us section. We are dedicated to providing you with the latest updates on government jobs, private jobs, work-from-home opportunities, and trending news.</p>
-            <br>
-            <p>Our goal is to make job hunting easier and more accessible for everyone.</p>
-        `;
-        openModal("ABOUT US", demoAboutText);
-    });
-
-    contactBtn.addEventListener('click', () => {
-        const demoContactText = `
-            <h4>Contact Information</h4>
-            <br>
-            <p><strong>Phone:</strong> +91-9876543210 (Demo)</p>
-            <p><strong>Email:</strong> support@demo-news-portal.com</p>
-            <p><strong>Office Hours:</strong> Monday - Friday, 9:00 AM to 5:00 PM</p>
-        `;
-        openModal("CONTACT NUMBER", demoContactText);
-    });
 
     /* --- LOGO CLICK LOGIC --- */
     const homeLogo = document.getElementById('home-logo');
@@ -819,13 +924,13 @@
                     // Attach event to read the article and return back to search
                     div.querySelector('.know-more-btn').addEventListener('click', () => {
                         
-                        // NEW LOGIC: Count the view when clicked from Search!
+                        // Count the view
                         db.collection('posts').doc(doc.id).update({
                             views: firebase.firestore.FieldValue.increment(1)
                         }).catch(err => console.log("Error updating views", err));
 
-                        const backBtnHTML = '<br><br><hr style="border: 1px solid #ddd;"><br><button onclick="openSearchModal()" style="padding: 8px 12px; cursor: pointer; background: black; color: white; border: none; border-radius: 4px; font-weight: bold;">⬅ Back to Search</button>';
-                        openModal(titleText, contentHTML + backBtnHTML);
+                        // Redirect to the new article page!
+                        window.location.href = `article.html?id=${doc.id}`;
                     });
 
                     // Attach event to save to favorites
